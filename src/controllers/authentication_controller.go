@@ -30,5 +30,9 @@ func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error 
 }
 
 func (controller *AuthenticationController) VerifyEmail(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
+	return ctx.JSON(fiber.Map{"message": "VerifyEmail route"})
+}
+
+func (controller *AuthenticationController) ChangePassword(ctx *fiber.Ctx) error {
+	return ctx.JSON(fiber.Map{"message": "ChangePassword route"})
 }

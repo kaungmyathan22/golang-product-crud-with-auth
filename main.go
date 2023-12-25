@@ -13,6 +13,7 @@ func main() {
 	config.BootstrapApp()
 	app := fiber.New()
 	v1Group := app.Group("/api/v1")
+	routes.InitAuthenticationRoutes(v1Group)
 	routes.InitProductRoutes(v1Group)
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.JSON(map[string]string{
