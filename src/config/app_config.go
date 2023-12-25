@@ -10,7 +10,7 @@ import (
 )
 
 type AppConfig struct {
-	PORT int16
+	PORT string
 }
 
 var AppConfigInstance AppConfig
@@ -20,9 +20,9 @@ func LoadConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(dir)
 	envFile := fmt.Sprintf("%s/.env", dir)
 	viper.SetConfigFile(envFile)
+	viper.ReadInConfig()
 	viper.AutomaticEnv()
 	if err := viper.Unmarshal(&AppConfigInstance); err != nil {
 		logger.Fatal(err.Error())
