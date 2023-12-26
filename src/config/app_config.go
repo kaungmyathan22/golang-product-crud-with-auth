@@ -10,7 +10,11 @@ import (
 )
 
 type AppConfig struct {
-	PORT string
+	PORT               string
+	DATABASE_URI       string
+	DATABASE_NAME      string
+	USER_COLLECTION    string
+	PRODUCT_COLLECTION string
 }
 
 var AppConfigInstance AppConfig
