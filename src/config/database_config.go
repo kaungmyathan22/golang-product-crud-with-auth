@@ -23,11 +23,8 @@ func ConnectToDatabase() *mongo.Client {
 	if err != nil {
 		panic(err)
 	}
+	logger.Info("Pinged. You successfully connected to MongoDB!")
 	logger.Info("Connected to database.")
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
+
 	return client
 }
