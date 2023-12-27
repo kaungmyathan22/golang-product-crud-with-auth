@@ -36,8 +36,17 @@ func (controller *AuthenticationController) Register(ctx *fiber.Ctx) error {
 			Errors: common.TransformError(err.Error()),
 		})
 	}
+	user, err := controller.Service.CreateUser(&payload)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
 
-	return ctx.JSON(fiber.Map{"message": "Register route"})
+	return ctx.JSON(fiber.Map{"message": "Successfully registered.", "data": map[string]string{
+		"username": user.Username,
+	}})
 }
 
 func (controller *AuthenticationController) RefreshToken(ctx *fiber.Ctx) error {
