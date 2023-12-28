@@ -7,6 +7,7 @@ import (
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/repositories"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,7 +22,8 @@ func (svc *UserService) CreateUser(payload *dto.CreateUserDTO) (*models.UserMode
 	if err != nil {
 		return nil, err
 	}
-	user := models.UserModel{
+
+	user := dto.UserDTO{
 		Username:   payload.Username,
 		Password:   string(hashed_password),
 		CreatedAt:  time.Now(),
@@ -36,6 +38,14 @@ func (svc *UserService) CreateUser(payload *dto.CreateUserDTO) (*models.UserMode
 		return nil, err
 	}
 	fmt.Println(result.InsertedID)
-	// user.ID = result.InsertedID.(primitive.ObjectID)
-	return &user, err
+	user.ID = result.InsertedID.(primitive.ObjectID)
+	return user.ToModel(), err
+}
+
+func (svc *UserService) GetUserByUsername(username string) (*dto.UserDTO, error) {
+	user, err := svc.Repository.GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
