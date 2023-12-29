@@ -43,9 +43,9 @@ func (svc *UserService) CreateUser(payload *dto.CreateUserDTO) (*models.UserMode
 }
 
 func (svc *UserService) GetUserByUsername(username string) (*dto.UserDTO, error) {
-	user, err := svc.Repository.GetUserByUsername(username)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return svc.Repository.GetUserByUsername(username)
+}
+
+func (svc *UserService) GetUserByUserId(userId string) (*dto.UserDTO, error) {
+	return svc.Repository.GetUserByUserId(userId)
 }
