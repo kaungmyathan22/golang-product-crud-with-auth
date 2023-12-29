@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/logger"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/middlewares"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/routes"
 )
 
@@ -13,7 +14,7 @@ func main() {
 	config.BootstrapApp()
 	client := config.ConnectToDatabase()
 	app := fiber.New()
-	v1Group := app.Group("/api/v1")
+	v1Group := app.Group("/api/v1", middlewares.LoggerMiddleware)
 	routes.InitAuthenticationRoutes(v1Group, client)
 	routes.InitProductRoutes(v1Group, client)
 	v1Group.Get("/ping", func(c *fiber.Ctx) error {
