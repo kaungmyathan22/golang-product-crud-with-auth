@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/exceptions"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/logger"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/services"
 	"golang.org/x/crypto/bcrypt"
@@ -112,4 +113,12 @@ func (controller *AuthenticationController) VerifyEmail(ctx *fiber.Ctx) error {
 
 func (controller *AuthenticationController) ChangePassword(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{"message": "ChangePassword route"})
+}
+
+func (controller *AuthenticationController) Me(ctx *fiber.Ctx) error {
+	user, ok := ctx.Context().UserValue("user").(*dto.UserDTO)
+	if !ok {
+		ctx.Status(fiber.StatusUnauthorized).JSON(exceptions.UnauthorizedRequestException())
+	}
+	return ctx.JSON(user)
 }
