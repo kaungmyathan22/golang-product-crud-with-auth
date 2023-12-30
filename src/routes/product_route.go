@@ -11,13 +11,23 @@ import (
 )
 
 func InitProductRoutes(routeGroup fiber.Router, client *mongo.Client) {
-	product_controller := controllers.ProductController{}
+
 	userCollection := client.Database(config.AppConfigInstance.DATABASE_NAME).Collection(config.AppConfigInstance.USER_COLLECTION)
+	productCollection := client.Database(config.AppConfigInstance.DATABASE_NAME).Collection(config.AppConfigInstance.PRODUCT_COLLECTION)
 	userRepository := &repositories.UserRepository{
 		UserCollection: userCollection,
 	}
+	productRepository := &repositories.ProductRepository{
+		ProductCollection: productCollection,
+	}
 	authentication_service := services.UserService{
 		Repository: userRepository,
+	}
+	product_service := services.ProductService{
+		ProductRepository: productRepository,
+	}
+	product_controller := controllers.ProductController{
+		ProductService: &product_service,
 	}
 	router := routeGroup.Group("/products", middlewares.IsAuthenticatedMiddleware(authentication_service))
 	router.Get("/", product_controller.GetProducts)
