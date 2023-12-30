@@ -1,10 +1,10 @@
 package repositories
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,11 +14,13 @@ type UserRepository struct {
 	UserCollection *mongo.Collection
 }
 
-var ctx = context.TODO()
-
-func (repo *UserRepository) CreateUser(payload *dto.UserDTO) (*mongo.InsertOneResult, error) {
+func (repo *UserRepository) CreateUser(payload *models.UserModel) (*models.UserModel, error) {
 	result, err := repo.UserCollection.InsertOne(ctx, payload)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	payload.ID = result.InsertedID.(primitive.ObjectID)
+	return payload, err
 }
 
 func (repo *UserRepository) GetUserByUsername(username string) (*dto.UserDTO, error) {
