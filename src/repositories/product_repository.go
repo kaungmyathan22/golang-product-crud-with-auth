@@ -15,6 +15,9 @@ func (repository *ProductRepository) GetProductById() {}
 
 func (repository *ProductRepository) CreateProduct(payload *models.ProductModel) (*models.ProductModel, error) {
 	result, err := repository.ProductCollection.InsertOne(ctx, payload)
+	if err != nil {
+		return nil, err
+	}
 	payload.ID = result.InsertedID.(primitive.ObjectID)
 	return payload, err
 }
