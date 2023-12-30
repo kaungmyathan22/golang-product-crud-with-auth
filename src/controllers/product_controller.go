@@ -16,7 +16,15 @@ func (controller *ProductController) GetProducts(ctx *fiber.Ctx) error {
 }
 
 func (controller *ProductController) GetProduct(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get product endpoints"})
+	productId := ctx.Params("id")
+	product, err := controller.ProductService.GetProductByProductId(productId)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: []string{err.Error()},
+		})
+	}
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"data": product})
 }
 
 func (controller *ProductController) CreateProduct(ctx *fiber.Ctx) error {
