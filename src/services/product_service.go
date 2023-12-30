@@ -27,5 +27,11 @@ func (svc *ProductService) CreateProduct(payload *dto.CreateProductDTO) (*dto.Pr
 }
 
 func (svc *ProductService) GetProductByProductId(productId string) (*dto.ProductDTO, error) {
-	return svc.ProductRepository.GetProductById(productId)
+
+func (svc *ProductService) DeleteProductByProductId(productId string) error {
+	objectId, err := primitive.ObjectIDFromHex(productId)
+	if err != nil {
+		return nil
+	}
+	return svc.ProductRepository.DeleteProduct(objectId)
 }
