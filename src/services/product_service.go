@@ -9,7 +9,7 @@ import (
 )
 
 type ProductService struct {
-	productRepository *repositories.ProductRepository
+	ProductRepository *repositories.ProductRepository
 }
 
 func (svc *ProductService) CreateProduct(payload *dto.CreateProductDTO) (*dto.ProductDTO, error) {
@@ -19,7 +19,7 @@ func (svc *ProductService) CreateProduct(payload *dto.CreateProductDTO) (*dto.Pr
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
-	product, err := svc.productRepository.CreateProduct(product)
+	product, err := svc.ProductRepository.CreateProduct(product)
 	if err != nil {
 		return nil, err
 	}
