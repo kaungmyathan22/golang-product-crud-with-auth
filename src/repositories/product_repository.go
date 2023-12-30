@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"fmt"
+
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,13 +16,12 @@ type ProductRepository struct {
 
 func (repository *ProductRepository) GetAllProduct() {}
 
-func (repository *ProductRepository) GetProductById(productId string) (*dto.ProductDTO, error) {
+func (repository *ProductRepository) GetProductById(productId primitive.ObjectID) (*dto.ProductDTO, error) {
 	var product dto.ProductDTO
-	objectId, err := primitive.ObjectIDFromHex(productId)
-	if err != nil {
-		return nil, err
+	err := repository.ProductCollection.FindOne(ctx, bson.M{"_id": productId}).Decode(&product)
+	if err == mongo.ErrNoDocuments {
+		return nil, fmt.Errorf("product not found with given id %s", productId.Hex())
 	}
-	err = repository.ProductCollection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&product)
 	if err != nil {
 		return nil, err
 	}
