@@ -32,13 +32,10 @@ func IsAuthenticatedMiddleware(userService services.UserService) fiber.Handler {
 			return secretKey, nil
 		})
 		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
-				return c.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
-					Code:   fiber.StatusUnauthorized,
-					Errors: []string{"Invalid authorization token."},
-				})
-			}
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Bad request"})
+			return c.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+				Code:   fiber.StatusBadRequest,
+				Errors: []string{"Invalid authorization token."},
+			})
 		}
 
 		if !token.Valid {
