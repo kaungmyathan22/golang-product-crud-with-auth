@@ -3,7 +3,6 @@ package dto
 import (
 	"time"
 
-	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -14,17 +13,6 @@ type UserDTO struct {
 	Username   string             `bson:"username" json:"username"`
 	Password   string             `bson:"password" json:"-"`
 	IsDisabled bool               `bson:"isDisabled" json:"isDisabled"`
-}
-
-func (dto *UserDTO) ToModel() *models.UserModel {
-	return &models.UserModel{
-		ID:         dto.ID,
-		Username:   dto.Username,
-		Password:   dto.Password,
-		CreatedAt:  dto.CreatedAt,
-		UpdatedAt:  dto.UpdatedAt,
-		IsDisabled: dto.IsDisabled,
-	}
 }
 
 type CreateUserDTO struct {
