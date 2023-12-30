@@ -58,5 +58,13 @@ func (controller *ProductController) UpdateProduct(ctx *fiber.Ctx) error {
 }
 
 func (controller *ProductController) DeleteProduct(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Delete product endpoints"})
+	productId := ctx.Params("id")
+	err := controller.ProductService.DeleteProductByProductId(productId)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: []string{err.Error()},
+		})
+	}
+	return ctx.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Successfully deleted product."})
 }
