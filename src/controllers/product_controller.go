@@ -1,25 +1,54 @@
 package controllers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/services"
+)
 
-type ProductController struct{}
-
-func (controller *ProductController) GetProducts(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get all product endpoints"})
+type ProductController struct {
+	ProductService *services.ProductService
 }
 
-func (controller *ProductController) GetProduct(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get product endpoints"})
+func (controller *ProductController) GetProducts(ctx *fiber.Ctx) error {
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get all product endpoints"})
 }
 
-func (controller *ProductController) CreateProduct(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Create product endpoints"})
+func (controller *ProductController) GetProduct(ctx *fiber.Ctx) error {
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get product endpoints"})
 }
 
-func (controller *ProductController) UpdateProduct(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Update product endpoints"})
+func (controller *ProductController) CreateProduct(ctx *fiber.Ctx) error {
+	var payload *dto.CreateProductDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(common.ErrorResponse{
+			Errors: common.TransformError(err.Error()),
+			Code:   fiber.StatusUnprocessableEntity,
+		})
+	}
+	if err := validate.Struct(payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	product, err := controller.ProductService.CreateProduct(payload)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	return ctx.JSON(fiber.Map{"data": product})
 }
 
-func (controller *ProductController) DeleteProduct(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Delete product endpoints"})
+func (controller *ProductController) UpdateProduct(ctx *fiber.Ctx) error {
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Update product endpoints"})
+}
+
+func (controller *ProductController) DeleteProduct(ctx *fiber.Ctx) error {
+	return ctx.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Delete product endpoints"})
 }
