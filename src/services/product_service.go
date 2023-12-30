@@ -25,3 +25,7 @@ func (svc *ProductService) CreateProduct(payload *dto.CreateProductDTO) (*dto.Pr
 	}
 	return product.ToProductDTO(), nil
 }
+
+func (svc *ProductService) GetProductByProductId(productId string) (*dto.ProductDTO, error) {
+	return svc.ProductRepository.GetProductById(productId)
+}
