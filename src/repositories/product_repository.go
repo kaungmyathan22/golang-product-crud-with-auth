@@ -37,3 +37,15 @@ func (repository *ProductRepository) CreateProduct(payload *models.ProductModel)
 }
 
 func (repository *ProductRepository) UpdateProduct() {}
+
+func (repository *ProductRepository) DeleteProduct(productId primitive.ObjectID) error {
+
+	result, err := repository.ProductCollection.DeleteOne(ctx, bson.M{"_id": productId})
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("product not found with given id %s", productId.Hex())
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
