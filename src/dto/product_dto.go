@@ -15,8 +15,8 @@ type ProductDTO struct {
 }
 
 type CreateProductDTO struct {
-	ProductName  string  `bson:"productName" json:"productName"`
-	ProductPrice float32 `bson:"productPrice" json:"productPrice"`
+	ProductName  string  `bson:"productName" json:"productName" validate:"required"`
+	ProductPrice float32 `bson:"productPrice" json:"productPrice" validate:"required,gte=0"`
 }
 
 type UpdateProductDTO struct {
