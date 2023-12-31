@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,13 +14,8 @@ import (
 
 func IsAuthenticatedMiddleware(userService services.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		authorizationValue := c.Get("Authorization")
-		splittedAuthHeader := strings.Split(authorizationValue, "Bearer ")
-		tokenString := ""
-		if len(splittedAuthHeader) > 1 {
-			tokenString = splittedAuthHeader[1]
-		}
-		if authorizationValue == "" || tokenString == "" {
+		tokenString := c.Cookies(config.AppConfigInstance.ACCESS_TOKEN_COOKIE_NAME)
+		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
 				Code:   fiber.StatusUnauthorized,
 				Errors: []string{"Authorization token is required."},

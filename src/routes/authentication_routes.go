@@ -39,13 +39,14 @@ func InitAuthenticationRoutes(routeGroup fiber.Router, client *mongo.Client) {
 	router := routeGroup.Group("/authentication")
 	router.Post("/login", authentication_controller.Login)
 	router.Post("/register", authentication_controller.Register)
-	router.Post("/logout", authentication_controller.Logout)
+
 	router.Post("/forgot-password", authentication_controller.ForgotPassword)
 	router.Post("/reset-password", authentication_controller.ResetPassword)
 	router.Post("/change-password", authentication_controller.ChangePassword)
 	router.Post("/verify-email", authentication_controller.VerifyEmail)
 	router.Post("/refresh-token", authentication_controller.RefreshToken)
 
+	router.Get("/logout", middlewares.IsAuthenticatedMiddleware(authentication_service), authentication_controller.Logout)
 	router.Get("/me", middlewares.IsAuthenticatedMiddleware(authentication_service), authentication_controller.Me)
 	router.Get("/delete-account", middlewares.IsAuthenticatedMiddleware(authentication_service), authentication_controller.DeleteAccount)
 }

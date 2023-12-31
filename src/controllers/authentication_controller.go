@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/exceptions"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/logger"
@@ -63,11 +65,28 @@ func (controller *AuthenticationController) Login(ctx *fiber.Ctx) error {
 			Code:   fiber.StatusInternalServerError,
 		})
 	}
-	return ctx.JSON(fiber.Map{"user": user, "token": token})
+	cookie := &fiber.Cookie{
+		Name:     config.AppConfigInstance.ACCESS_TOKEN_COOKIE_NAME,
+		Value:    token,
+		Expires:  controller.TokenService.GetAccessTokenExpiration(),
+		HTTPOnly: true, // Make the cookie HTTP-only for added security
+		SameSite: "Strict",
+	}
+	ctx.Cookie(cookie)
+	return ctx.JSON(fiber.Map{"user": user})
 }
 
 func (controller *AuthenticationController) Logout(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{"message": "Logout route"})
+	expiredCookie := fiber.Cookie{
+		Name:     config.AppConfigInstance.ACCESS_TOKEN_COOKIE_NAME,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour), // Set expiration time in the past
+		HTTPOnly: true,
+		SameSite: "Strict",
+	}
+	// Set the expired cookie in the response
+	ctx.Cookie(&expiredCookie)
+	return ctx.JSON(fiber.Map{"message": "Successfully logout."})
 }
 
 func (controller *AuthenticationController) Register(ctx *fiber.Ctx) error {
