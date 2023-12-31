@@ -10,6 +10,7 @@ import (
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common/interfaces"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/services"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func IsAuthenticatedMiddleware(userService services.UserService) fiber.Handler {
@@ -53,12 +54,14 @@ func IsAuthenticatedMiddleware(userService services.UserService) fiber.Handler {
 			})
 		}
 		userID := claims.Sub
-		user, _ := userService.GetUserByUserId(userID)
+		user, err := userService.GetUserByUserId(userID)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
-				Code:   fiber.StatusUnauthorized,
-				Errors: []string{"Authorization token expired."},
-			})
+			if err == mongo.ErrNoDocuments {
+				return c.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
+					Code:   fiber.StatusUnauthorized,
+					Errors: common.TransformError("User not found associating with this token. May be account has been deleted."),
+				})
+			}
 		}
 		c.Context().SetUserValue("user", user)
 		return c.Next()

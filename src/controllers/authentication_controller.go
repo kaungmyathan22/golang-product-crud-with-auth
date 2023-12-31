@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
@@ -121,4 +123,22 @@ func (controller *AuthenticationController) Me(ctx *fiber.Ctx) error {
 		ctx.Status(fiber.StatusUnauthorized).JSON(exceptions.UnauthorizedRequestException())
 	}
 	return ctx.JSON(user)
+}
+
+func (controller *AuthenticationController) DeleteAccount(ctx *fiber.Ctx) error {
+	user, ok := ctx.Context().UserValue("user").(*dto.UserDTO)
+	fmt.Println(user)
+	if !ok {
+		ctx.Status(fiber.StatusUnauthorized).JSON(exceptions.UnauthorizedRequestException())
+	}
+	err := controller.Service.DeleteUserById(user)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "Successfully delete account.",
+	})
 }

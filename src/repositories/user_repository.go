@@ -46,3 +46,8 @@ func (repo *UserRepository) GetUserByUserId(userId string) (*dto.UserDTO, error)
 	}
 	return &user, nil
 }
+
+func (repo *UserRepository) DeleteUserByUserId(userId primitive.ObjectID) error {
+	result := repo.UserCollection.FindOneAndDelete(ctx, bson.M{"_id": userId})
+	return result.Err()
+}

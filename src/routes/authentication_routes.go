@@ -47,4 +47,5 @@ func InitAuthenticationRoutes(routeGroup fiber.Router, client *mongo.Client) {
 	router.Post("/refresh-token", authentication_controller.RefreshToken)
 
 	router.Get("/me", middlewares.IsAuthenticatedMiddleware(authentication_service), authentication_controller.Me)
+	router.Get("/delete-account", middlewares.IsAuthenticatedMiddleware(authentication_service), authentication_controller.DeleteAccount)
 }
