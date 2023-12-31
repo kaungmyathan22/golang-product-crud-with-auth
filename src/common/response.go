@@ -5,6 +5,6 @@ type ErrorResponse struct {
 	Errors []string `json:"errors"`
 }
 type PaginationParams struct {
-	Page     int `query:"page,default=1"`
-	PageSize int `query:"pageSize,default=10"`
+	Page     int64 `query:"page,default=1"`
+	PageSize int64 `query:"pageSize,default=10"`
 }
