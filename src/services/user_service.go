@@ -21,11 +21,13 @@ func (svc *UserService) CreateUser(payload *dto.CreateUserDTO) (*dto.UserDTO, er
 		return nil, err
 	}
 	user := models.UserModel{
-		Username:   payload.Username,
-		Password:   string(hashed_password),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		IsDisabled: false,
+		Email:           payload.Email,
+		IsEmailVerified: false,
+		Username:        payload.Username,
+		Password:        string(hashed_password),
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+		IsDisabled:      false,
 	}
 	_, err = svc.Repository.CreateUser(&user)
 	if err != nil {

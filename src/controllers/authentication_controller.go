@@ -57,6 +57,12 @@ func (controller *AuthenticationController) Login(ctx *fiber.Ctx) error {
 			Code:   fiber.StatusUnauthorized,
 		})
 	}
+	if !user.IsEmailVerified {
+		return ctx.Status(fiber.StatusForbidden).JSON(common.ErrorResponse{
+			Errors: common.TransformError("Please verify your email first."),
+			Code:   fiber.StatusForbidden,
+		})
+	}
 	token, err := controller.TokenService.SignAccessToken(user.ID.Hex())
 	if err != nil {
 		logger.Info(err.Error())

@@ -7,15 +7,18 @@ import (
 )
 
 type UserDTO struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	CreatedAt  time.Time          `bson:"created_at" json:"created_at"`
-	UpdatedAt  time.Time          `bson:"updated_at" json:"updated_at"`
-	Username   string             `bson:"username" json:"username"`
-	Password   string             `bson:"password" json:"-"`
-	IsDisabled bool               `bson:"isDisabled" json:"isDisabled"`
+	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	CreatedAt       time.Time          `bson:"created_at" json:"created_at"`
+	UpdatedAt       time.Time          `bson:"updated_at" json:"updated_at"`
+	Username        string             `bson:"username" json:"username"`
+	Password        string             `bson:"password" json:"-"`
+	Email           string             `bson:"email" json:"email"`
+	IsEmailVerified bool               `bson:"isEmailVerified" json:"isEmailVerified"`
+	IsDisabled      bool               `bson:"isDisabled" json:"isDisabled"`
 }
 
 type CreateUserDTO struct {
+	Email    string `json:"email" validate:"required,email" error:"email field is required and must be a valid email address."`
 	Username string `json:"username" validate:"required,min=3" error:"username field is required and must be a minimum of 3."`
 	Password string `json:"password" validate:"required,min=6" error:"password field is required and must be a minimum of 6."`
 }

@@ -57,6 +57,12 @@ func IsAuthenticatedMiddleware(userService services.UserService) fiber.Handler {
 				})
 			}
 		}
+		if !user.IsEmailVerified {
+			return c.Status(fiber.StatusForbidden).JSON(common.ErrorResponse{
+				Code:   fiber.StatusForbidden,
+				Errors: common.TransformError("Please verify email first."),
+			})
+		}
 		c.Context().SetUserValue("user", user)
 		return c.Next()
 	}
