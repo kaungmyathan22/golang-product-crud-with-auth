@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"math"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
@@ -12,7 +14,47 @@ type ProductController struct {
 }
 
 func (controller *ProductController) GetProducts(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Get all product endpoints"})
+	paginationParams := common.ParsePaginationParams(ctx)
+	products, err := controller.ProductService.GetProductByProducts(paginationParams)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	count, err := controller.ProductService.GetProductsCount()
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	totalPages := int64(math.Ceil(float64(count) / float64(paginationParams.PageSize)))
+	var previousPage *int64
+	if paginationParams.Page > 1 {
+		temp := paginationParams.Page - 1
+		previousPage = &temp
+	} else {
+		previousPage = nil
+	}
+
+	var nextPage *int64
+	if paginationParams.Page+1 < totalPages {
+		temp := paginationParams.Page + 1
+		nextPage = &temp
+	} else {
+		nextPage = nil
+	}
+
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"page":         paginationParams.Page,
+		"pageSize":     paginationParams.PageSize,
+		"totalItems":   count,
+		"totalPages":   totalPages,
+		"nextPage":     nextPage,
+		"previousPage": previousPage,
+		"items":        products,
+	})
 }
 
 func (controller *ProductController) GetProduct(ctx *fiber.Ctx) error {
@@ -35,6 +77,7 @@ func (controller *ProductController) CreateProduct(ctx *fiber.Ctx) error {
 			Code:   fiber.StatusUnprocessableEntity,
 		})
 	}
+	// payload.ProductName += time.Now().String()
 	if err := validate.Struct(payload); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
 			Code:   fiber.StatusBadRequest,
