@@ -14,7 +14,14 @@ type ProductRepository struct {
 	ProductCollection *mongo.Collection
 }
 
-func (repository *ProductRepository) GetAllProduct() {}
+func (repository *ProductRepository) GetAllProductCount(filter bson.M) (int64, error) {
+	count, err := repository.ProductCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 
 func (repository *ProductRepository) GetProductById(productId primitive.ObjectID) (*dto.ProductDTO, error) {
 	var product dto.ProductDTO
