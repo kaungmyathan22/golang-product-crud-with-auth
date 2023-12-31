@@ -62,7 +62,19 @@ func (repository *ProductRepository) CreateProduct(payload *models.ProductModel)
 	return payload, err
 }
 
-func (repository *ProductRepository) UpdateProduct() {}
+func (repository *ProductRepository) UpdateProduct(payload *dto.UpdateProductDTO, filter *bson.M) (*dto.ProductDTO, error) {
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
+	result := repository.ProductCollection.FindOneAndUpdate(ctx, filter, bson.D{{Key: "$set", Value: payload}}, options)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	var updatedProduct dto.ProductDTO
+	if err := result.Decode(&updatedProduct); err != nil {
+		return nil, err
+	}
+
+	return &updatedProduct, nil
+}
 
 func (repository *ProductRepository) DeleteProduct(productId primitive.ObjectID) error {
 

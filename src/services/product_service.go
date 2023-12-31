@@ -52,3 +52,11 @@ func (svc *ProductService) GetProductByProducts(params *common.PaginationParams)
 func (svc *ProductService) GetProductsCount() (int64, error) {
 	return svc.ProductRepository.GetAllProductCount(bson.M{})
 }
+
+func (svc *ProductService) UpdateProduct(payload *dto.UpdateProductDTO, productId string) (*dto.ProductDTO, error) {
+	objectId, err := primitive.ObjectIDFromHex(productId)
+	if err != nil {
+		return nil, err
+	}
+	return svc.ProductRepository.UpdateProduct(payload, &bson.M{"_id": objectId})
+}

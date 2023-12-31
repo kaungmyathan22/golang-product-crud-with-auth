@@ -77,7 +77,6 @@ func (controller *ProductController) CreateProduct(ctx *fiber.Ctx) error {
 			Code:   fiber.StatusUnprocessableEntity,
 		})
 	}
-	// payload.ProductName += time.Now().String()
 	if err := validate.Struct(payload); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
 			Code:   fiber.StatusBadRequest,
@@ -97,7 +96,30 @@ func (controller *ProductController) CreateProduct(ctx *fiber.Ctx) error {
 }
 
 func (controller *ProductController) UpdateProduct(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Update product endpoints"})
+	productId := ctx.Params("id")
+	var payload *dto.UpdateProductDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(common.ErrorResponse{
+			Errors: common.TransformError(err.Error()),
+			Code:   fiber.StatusUnprocessableEntity,
+		})
+	}
+	if err := validate.Struct(payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	product, err := controller.ProductService.UpdateProduct(payload, productId)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	return ctx.JSON(fiber.Map{"data": product})
 }
 
 func (controller *ProductController) DeleteProduct(ctx *fiber.Ctx) error {
