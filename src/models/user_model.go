@@ -8,12 +8,14 @@ import (
 )
 
 type UserModel struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	CreatedAt  time.Time          `bson:"created_at"`
-	UpdatedAt  time.Time          `bson:"updated_at"`
-	Username   string             `bson:"username"`
-	Password   string             `bson:"password"`
-	IsDisabled bool               `bson:"isDisabled"`
+	ID              primitive.ObjectID `bson:"_id,omitempty"`
+	CreatedAt       time.Time          `bson:"created_at"`
+	UpdatedAt       time.Time          `bson:"updated_at"`
+	Username        string             `bson:"username"`
+	Email           string             `bson:"email"`
+	IsEmailVerified bool               `bson:"isEmailVerified"`
+	Password        string             `bson:"password"`
+	IsDisabled      bool               `bson:"isDisabled"`
 }
 
 func (model *UserModel) ToUserDTO() *dto.UserDTO {
