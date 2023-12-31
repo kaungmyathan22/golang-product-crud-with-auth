@@ -3,11 +3,13 @@ package repositories
 import (
 	"fmt"
 
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ProductRepository struct {
@@ -22,6 +24,22 @@ func (repository *ProductRepository) GetAllProductCount(filter bson.M) (int64, e
 	return count, nil
 }
 
+func (repository *ProductRepository) GetAllProduct(params *common.PaginationParams) ([]*dto.ProductDTO, error) {
+	skip := (params.Page - 1) * params.PageSize
+
+	cursor, err := repository.ProductCollection.Find(ctx, bson.M{}, &options.FindOptions{
+		Limit: &params.PageSize,
+		Skip:  &skip,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var products []*dto.ProductDTO
+	if err := cursor.All(ctx, &products); err != nil {
+		return nil, err
+	}
+	return products, nil
+}
 
 func (repository *ProductRepository) GetProductById(productId primitive.ObjectID) (*dto.ProductDTO, error) {
 	var product dto.ProductDTO
