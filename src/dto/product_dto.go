@@ -20,6 +20,6 @@ type CreateProductDTO struct {
 }
 
 type UpdateProductDTO struct {
-	ProductName  string  `bson:"productName" json:"productName"`
-	ProductPrice float32 `bson:"productPrice" json:"productPrice"`
+	ProductName  string  `bson:"productName,omitempty" json:"productName,omitempty"`
+	ProductPrice float32 `bson:"productPrice,omitempty" json:"productPrice,omitempty"`
 }
