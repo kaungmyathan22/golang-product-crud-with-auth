@@ -3,9 +3,11 @@ package services
 import (
 	"time"
 
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/repositories"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -41,4 +43,12 @@ func (svc *ProductService) DeleteProductByProductId(productId string) error {
 		return nil
 	}
 	return svc.ProductRepository.DeleteProduct(objectId)
+}
+
+func (svc *ProductService) GetProductByProducts(params *common.PaginationParams) ([]*dto.ProductDTO, error) {
+	return svc.ProductRepository.GetAllProduct(params)
+}
+
+func (svc *ProductService) GetProductsCount() (int64, error) {
+	return svc.ProductRepository.GetAllProductCount(bson.M{})
 }
