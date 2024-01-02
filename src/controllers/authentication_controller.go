@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -139,7 +138,52 @@ func (controller *AuthenticationController) VerifyEmail(ctx *fiber.Ctx) error {
 }
 
 func (controller *AuthenticationController) ChangePassword(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{"message": "ChangePassword route"})
+	var payload dto.ChangePasswordDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "invalid payload",
+			"error":   err.Error(),
+		})
+	}
+	if err := validate.Struct(payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	if payload.NewPassword == payload.OldPassword {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(("New password cannot be the same with old password.")),
+		})
+	}
+	user, ok := ctx.Context().UserValue("user").(*dto.UserDTO)
+	if !ok {
+		ctx.Status(fiber.StatusUnauthorized).JSON(exceptions.UnauthorizedRequestException())
+	}
+	if err := user.IsPasswordMach(payload.OldPassword); err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
+			Code:   fiber.StatusUnauthorized,
+			Errors: common.TransformError(("Incorrect old password.")),
+		})
+	}
+	hashed_password, err := bcrypt.GenerateFromPassword([]byte(payload.NewPassword), bcrypt.DefaultCost) //payload.Password
+	if err != nil {
+		logger.Info(err.Error())
+		return ctx.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
+			Code:   fiber.StatusInternalServerError,
+			Errors: common.TransformError(("Something went wrong.")),
+		})
+	}
+	if err = controller.Service.ChangePassword(user, string(hashed_password)); err != nil {
+		logger.Info(err.Error())
+		return ctx.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
+			Code:   fiber.StatusInternalServerError,
+			Errors: common.TransformError(("Error changing password.")),
+		})
+	}
+	return ctx.JSON(fiber.Map{"message": "Successfully changed password. Please log back in."})
 }
 
 func (controller *AuthenticationController) Me(ctx *fiber.Ctx) error {
@@ -152,7 +196,6 @@ func (controller *AuthenticationController) Me(ctx *fiber.Ctx) error {
 
 func (controller *AuthenticationController) DeleteAccount(ctx *fiber.Ctx) error {
 	user, ok := ctx.Context().UserValue("user").(*dto.UserDTO)
-	fmt.Println(user)
 	if !ok {
 		ctx.Status(fiber.StatusUnauthorized).JSON(exceptions.UnauthorizedRequestException())
 	}

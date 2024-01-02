@@ -7,6 +7,7 @@ import (
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/repositories"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -49,4 +50,8 @@ func (svc *UserService) GetUserByUserId(userId string) (*dto.UserDTO, error) {
 
 func (svc *UserService) DeleteUserById(user *dto.UserDTO) error {
 	return svc.Repository.DeleteUserByUserId(user.ID)
+}
+
+func (svc *UserService) ChangePassword(user *dto.UserDTO, password string) error {
+	return svc.Repository.UpdateUser(user.ID, bson.M{"password": password})
 }

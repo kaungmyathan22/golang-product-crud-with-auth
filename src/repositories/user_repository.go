@@ -51,3 +51,12 @@ func (repo *UserRepository) DeleteUserByUserId(userId primitive.ObjectID) error 
 	result := repo.UserCollection.FindOneAndDelete(ctx, bson.M{"_id": userId})
 	return result.Err()
 }
+
+func (repo *UserRepository) UpdateUser(userId primitive.ObjectID, payload bson.M) error {
+	updatedResult, err := repo.UserCollection.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": payload})
+	fmt.Println(updatedResult)
+	if err != nil {
+		return err
+	}
+	return nil
+}
