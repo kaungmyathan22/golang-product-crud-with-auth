@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"fmt"
-
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,11 +24,9 @@ func (repo *UserRepository) CreateUser(payload *models.UserModel) (*models.UserM
 func (repo *UserRepository) GetUserByUsername(username string) (*dto.UserDTO, error) {
 	var user dto.UserDTO
 	err := repo.UserCollection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
-	fmt.Println(user.ID)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(user.ID)
 	return &user, nil
 }
 
@@ -53,8 +49,7 @@ func (repo *UserRepository) DeleteUserByUserId(userId primitive.ObjectID) error 
 }
 
 func (repo *UserRepository) UpdateUser(userId primitive.ObjectID, payload bson.M) error {
-	updatedResult, err := repo.UserCollection.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": payload})
-	fmt.Println(updatedResult)
+	_, err := repo.UserCollection.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": payload})
 	if err != nil {
 		return err
 	}
