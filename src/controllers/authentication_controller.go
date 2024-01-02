@@ -125,6 +125,10 @@ func (controller *AuthenticationController) RefreshToken(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{"message": "RefreshToken route"})
 }
 
+func (controller *AuthenticationController) ResendVerificationEmail(ctx *fiber.Ctx) error {
+	return ctx.JSON(fiber.Map{"message": "ResendVerificationEmail"})
+}
+
 func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{"message": "ForgotPassword route"})
 }
