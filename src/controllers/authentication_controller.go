@@ -140,7 +140,40 @@ func (controller *AuthenticationController) Register(ctx *fiber.Ctx) error {
 }
 
 func (controller *AuthenticationController) RefreshToken(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{"message": "RefreshToken route"})
+	refreshTokenString := ctx.Cookies(config.AppConfigInstance.REFRESH_TOKEN_COOKIE_NAME)
+	claims, err := controller.TokenService.VerifyToken(refreshTokenString, "refresh token", []byte(config.AppConfigInstance.REFRESH_TOKEN_SECRET))
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	userID := claims.Sub
+	if err = controller.TokenService.VerifyRefreshToken(refreshTokenString, userID); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	token, err := controller.TokenService.SignAccessToken(userID)
+
+	if err != nil {
+		logger.Info(err.Error())
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.ErrorResponse{
+			Errors: common.TransformError("error signing access token."),
+			Code:   fiber.StatusInternalServerError,
+		})
+	}
+
+	cookie := &fiber.Cookie{
+		Name:     config.AppConfigInstance.ACCESS_TOKEN_COOKIE_NAME,
+		Value:    token,
+		Expires:  controller.TokenService.GetAccessTokenExpiration(),
+		HTTPOnly: true, // Make the cookie HTTP-only for added security
+		SameSite: "Strict",
+	}
+	ctx.Cookie(cookie)
+	return ctx.Status(fiber.StatusAccepted).JSON(fiber.Map{"message": "Successfully signed new access token."})
 }
 
 func (controller *AuthenticationController) ResendVerificationEmail(ctx *fiber.Ctx) error {
