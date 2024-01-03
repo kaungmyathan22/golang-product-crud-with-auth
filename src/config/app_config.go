@@ -14,11 +14,13 @@ type AppConfig struct {
 	DATABASE_URI              string
 	DATABASE_NAME             string
 	USER_COLLECTION           string
+	TOKEN_COLLECTION          string
 	PRODUCT_COLLECTION        string
 	ACCESS_TOKEN_SECRET       string
 	REFRESH_TOKEN_SECRET      string
 	ACCESS_TOKEN_COOKIE_NAME  string
 	REFRESH_TOKEN_COOKIE_NAME string
+	REFRESH_TOKEN_ENCRYPT_KEY string
 }
 
 var AppConfigInstance AppConfig
