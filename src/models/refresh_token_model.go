@@ -8,6 +8,7 @@ import (
 
 type RefreshTokenModel struct {
 	ID             primitive.ObjectID `bson:"_id,omitempty"`
+	UserIDs        primitive.ObjectID `bson:"userId"`
 	CreatedAt      time.Time          `bson:"created_at"`
 	UpdatedAt      time.Time          `bson:"updated_at"`
 	TokenHash      string             `bson:"tokenHash"`
