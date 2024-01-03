@@ -14,6 +14,7 @@ import (
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common/interfaces"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/logger"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/repositories"
 	"golang.org/x/crypto/scrypt"
 )
@@ -100,8 +101,11 @@ func (tokenService *TokenService) DecryptRefreshToken(encryptedToken string) (st
 	if err != nil {
 		return "", err
 	}
+	key := make([]byte, 32) // Use 32 bytes as an example, adjust as needed
 
-	block, err := aes.NewCipher([]byte(config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY))
+	copy(key, []byte(config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY))
+
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
@@ -124,6 +128,23 @@ func (tokenService *TokenService) DecryptRefreshToken(encryptedToken string) (st
 
 	return string(decryptedToken), nil
 }
+
+func (tokenService *TokenService) VerifyRefreshToken(token string, userID string) error {
+	tokenModel, err := tokenService.Repository.GetRefreshTokenByUserID(userID)
+	if err != nil {
+		return err
+	}
+	decryptedToken, err := tokenService.DecryptRefreshToken(tokenModel.TokenHash)
+	if err != nil {
+		return err
+	}
+	if decryptedToken != token {
+		logger.Debug("token doesn't match.")
+		return fmt.Errorf("invalid refresh token")
+	}
+	return nil
+}
+
 func (tokenService *TokenService) VerifyToken(tokenString, label string, secretKey []byte) (*interfaces.JwtCustomClaims, error) {
 	if tokenString == "" {
 		return nil, fmt.Errorf("%s token is required", label)
