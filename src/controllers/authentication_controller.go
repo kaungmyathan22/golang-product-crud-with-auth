@@ -63,6 +63,7 @@ func (controller *AuthenticationController) Login(ctx *fiber.Ctx) error {
 		})
 	}
 	token, err := controller.TokenService.SignAccessToken(user.ID.Hex())
+
 	if err != nil {
 		logger.Info(err.Error())
 		return ctx.Status(fiber.StatusInternalServerError).JSON(common.ErrorResponse{
@@ -70,10 +71,27 @@ func (controller *AuthenticationController) Login(ctx *fiber.Ctx) error {
 			Code:   fiber.StatusInternalServerError,
 		})
 	}
+	refreshToken, err := controller.TokenService.SignRefreshToken(user.ID.Hex())
+	if err != nil {
+		logger.Info(err.Error())
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.ErrorResponse{
+			Errors: common.TransformError("error signing refresh token."),
+			Code:   fiber.StatusInternalServerError,
+		})
+	}
 	cookie := &fiber.Cookie{
 		Name:     config.AppConfigInstance.ACCESS_TOKEN_COOKIE_NAME,
 		Value:    token,
 		Expires:  controller.TokenService.GetAccessTokenExpiration(),
+		HTTPOnly: true, // Make the cookie HTTP-only for added security
+		SameSite: "Strict",
+	}
+	ctx.Cookie(cookie)
+
+	cookie = &fiber.Cookie{
+		Name:     config.AppConfigInstance.REFRESH_TOKEN_COOKIE_NAME,
+		Value:    refreshToken,
+		Expires:  controller.TokenService.GetRefreshTokenExpiration(),
 		HTTPOnly: true, // Make the cookie HTTP-only for added security
 		SameSite: "Strict",
 	}
