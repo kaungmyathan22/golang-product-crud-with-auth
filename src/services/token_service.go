@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -94,7 +95,7 @@ func (tokenService *TokenService) EncryptRefreshToken(token string) (string, err
 	return base64.RawStdEncoding.EncodeToString(ciphertext), nil
 }
 
-func DecryptRefreshToken(encryptedToken string) (string, error) {
+func (tokenService *TokenService) DecryptRefreshToken(encryptedToken string) (string, error) {
 	ciphertext, err := base64.RawStdEncoding.DecodeString(encryptedToken)
 	if err != nil {
 		return "", err
@@ -122,6 +123,28 @@ func DecryptRefreshToken(encryptedToken string) (string, error) {
 	}
 
 	return string(decryptedToken), nil
+}
+func (tokenService *TokenService) VerifyToken(tokenString, label string, secretKey []byte) (*interfaces.JwtCustomClaims, error) {
+	if tokenString == "" {
+		return nil, fmt.Errorf("%s token is required", label)
+	}
+	claims := &interfaces.JwtCustomClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("invalid %s token", label)
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid %s token", label)
+	}
+
+	expires := claims.Exp
+	if time.Now().Unix() > expires {
+		return nil, fmt.Errorf("%s token expired", label)
+	}
+	return claims, nil
 }
 
 func GenerateAESKey(password, salt []byte) ([]byte, error) {
