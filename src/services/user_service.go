@@ -17,7 +17,7 @@ type UserService struct {
 }
 
 func (svc *UserService) CreateUser(payload *dto.CreateUserDTO) (*dto.UserDTO, error) {
-	hashed_password, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost) //payload.Password
+	hashed_password, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
