@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
@@ -11,6 +12,14 @@ import (
 
 type TokenRepository struct {
 	TokenCollection *mongo.Collection
+}
+
+func (repository *TokenRepository) GetRefreshTokenByUserID(userID string) (*models.RefreshTokenModel, error) {
+	var tokenModel models.RefreshTokenModel
+	if err := repository.TokenCollection.FindOne(ctx, bson.M{"userID": userID}).Decode(&tokenModel); err != nil {
+		return nil, fmt.Errorf("invalid refresh token")
+	}
+	return &tokenModel, nil
 }
 
 func (repository *TokenRepository) CreateNewToken(payload *dto.CreateRefreshTokenDTO) error {
