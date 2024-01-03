@@ -11,9 +11,7 @@ import (
 type TokenService struct {
 }
 
-func (tokenService *TokenService) SignAccessToken(userId string) (string, error) {
-	secretKey := []byte(config.AppConfigInstance.ACCESS_TOKEN_SECRET)
-	expTime := tokenService.GetAccessTokenExpiration()
+func signToken(expTime time.Time, userId string, secretKey []byte) (string, error) {
 	claims := interfaces.JwtCustomClaims{
 		Sub: userId,
 		Iat: time.Now().Unix(),
@@ -28,8 +26,18 @@ func (tokenService *TokenService) SignAccessToken(userId string) (string, error)
 	return tokenString, nil
 }
 
+func (tokenService *TokenService) SignAccessToken(userId string) (string, error) {
+	return signToken(tokenService.GetAccessTokenExpiration(), userId, []byte(config.AppConfigInstance.ACCESS_TOKEN_SECRET))
+}
+
 func (tokenService *TokenService) GetAccessTokenExpiration() time.Time {
 	return time.Now().Add(1 * time.Hour)
 }
 
-func (tokenService *TokenService) SignRefreshToken() {}
+func (tokenService *TokenService) GetRefreshTokenExpiration() time.Time {
+	return time.Now().Add(7 * 24 * time.Hour)
+}
+
+func (tokenService *TokenService) SignRefreshToken(userId string) (string, error) {
+	return signToken(tokenService.GetRefreshTokenExpiration(), userId, []byte(config.AppConfigInstance.REFRESH_TOKEN_SECRET))
+}
