@@ -20,7 +20,7 @@ func (repository *TokenRepository) CreateNewToken(payload *dto.CreateRefreshToke
 		return err
 	}
 	existingToken := repository.TokenCollection.FindOne(ctx, bson.M{"userId": userId})
-	if err != nil {
+	if existingToken.Err() != nil {
 		if errors.Is(existingToken.Err(), mongo.ErrNoDocuments) {
 			// create new token
 			_, err := repository.TokenCollection.InsertOne(ctx, payload)
