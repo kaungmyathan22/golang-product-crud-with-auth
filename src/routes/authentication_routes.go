@@ -17,6 +17,7 @@ import (
 
 func InitAuthenticationRoutes(routeGroup fiber.Router, client *mongo.Client) {
 	userCollection := client.Database(config.AppConfigInstance.DATABASE_NAME).Collection(config.AppConfigInstance.USER_COLLECTION)
+	tokenCollection := client.Database(config.AppConfigInstance.DATABASE_NAME).Collection(config.AppConfigInstance.TOKEN_COLLECTION)
 	indexModel := mongo.IndexModel{
 		Keys:    bson.D{{Key: "username", Value: 1}},
 		Options: options.Index().SetUnique(true),
@@ -33,8 +34,10 @@ func InitAuthenticationRoutes(routeGroup fiber.Router, client *mongo.Client) {
 		Repository: userRepository,
 	}
 	authentication_controller := controllers.AuthenticationController{
-		Service:      &authentication_service,
-		TokenService: &services.TokenService{},
+		Service: &authentication_service,
+		TokenService: &services.TokenService{
+			Repository: &repositories.TokenRepository{TokenCollection: tokenCollection},
+		},
 	}
 	router := routeGroup.Group("/authentication")
 	router.Post("/login", authentication_controller.Login)
