@@ -1,6 +1,8 @@
 package common
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 func ParsePaginationParams(c *fiber.Ctx) *PaginationParams {
 	params := new(PaginationParams)
@@ -19,4 +21,18 @@ func ParsePaginationParams(c *fiber.Ctx) *PaginationParams {
 	}
 
 	return params
+}
+
+func InvalidPayloadErrorResponse(ctx *fiber.Ctx, err error) error {
+	return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"message": "invalid payload",
+		"error":   err.Error(),
+	})
+}
+
+func BadRequestErrorResponse(ctx *fiber.Ctx, err error) error {
+	return ctx.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
+		Code:   fiber.StatusBadRequest,
+		Errors: TransformError(err.Error()),
+	})
 }
