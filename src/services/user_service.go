@@ -48,6 +48,10 @@ func (svc *UserService) GetUserByUserId(userId string) (*dto.UserDTO, error) {
 	return svc.Repository.GetUserByUserId(userId)
 }
 
+func (svc *UserService) GetUserByEmail(email string) (*dto.UserDTO, error) {
+	return svc.Repository.GetUserByEmail(email)
+}
+
 func (svc *UserService) DeleteUserById(user *dto.UserDTO) error {
 	return svc.Repository.DeleteUserByUserId(user.ID)
 }
