@@ -38,6 +38,7 @@ func InitAuthenticationRoutes(routeGroup fiber.Router, client *mongo.Client) {
 		TokenService: &services.TokenService{
 			Repository: &repositories.TokenRepository{TokenCollection: tokenCollection},
 		},
+		AuthenticationService: &services.AuthenticationService{},
 	}
 	router := routeGroup.Group("/authentication")
 	router.Post("/login", authentication_controller.Login)
