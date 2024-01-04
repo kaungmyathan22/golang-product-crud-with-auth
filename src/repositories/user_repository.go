@@ -1,6 +1,9 @@
 package repositories
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,6 +41,18 @@ func (repo *UserRepository) GetUserByUserId(userId string) (*dto.UserDTO, error)
 	}
 	err = repo.UserCollection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&user)
 	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (repo *UserRepository) GetUserByEmail(email string) (*dto.UserDTO, error) {
+	var user dto.UserDTO
+	err := repo.UserCollection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("User not found with given email address.")
+		}
 		return nil, err
 	}
 	return &user, nil
