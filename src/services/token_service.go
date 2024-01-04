@@ -101,7 +101,7 @@ func (tokenService *TokenService) DecryptRefreshToken(encryptedToken string) (st
 	if err != nil {
 		return "", err
 	}
-	key := make([]byte, 32) // Use 32 bytes as an example, adjust as needed
+	key := make([]byte, 32)
 
 	copy(key, []byte(config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY))
 
