@@ -16,6 +16,7 @@ type AppConfig struct {
 	USER_COLLECTION           string
 	TOKEN_COLLECTION          string
 	PRODUCT_COLLECTION        string
+	PASSWORD_RESET_COLLECTION string
 	ACCESS_TOKEN_SECRET       string
 	REFRESH_TOKEN_SECRET      string
 	ACCESS_TOKEN_COOKIE_NAME  string
