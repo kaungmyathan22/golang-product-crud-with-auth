@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -17,8 +18,10 @@ import (
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type AuthenticationController struct {
-	Service      *services.UserService
-	TokenService *services.TokenService
+	Service               *services.UserService
+	TokenService          *services.TokenService
+	AuthenticationService *services.AuthenticationService
+	EmailService          *services.EmailService
 }
 
 func (controller *AuthenticationController) Login(ctx *fiber.Ctx) error {
@@ -181,10 +184,31 @@ func (controller *AuthenticationController) ResendVerificationEmail(ctx *fiber.C
 }
 
 func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{"message": "ForgotPassword route"})
+	var payload dto.ForgotPasswordDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		fmt.Println(err.Error())
+		return common.InvalidPayloadErrorResponse(ctx, err)
+	}
+	if err := validate.Struct(payload); err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	// generate reset passwrord token
+	user, err := controller.Service.GetUserByEmail(payload.Email)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	code, err := controller.AuthenticationService.CreateNewPasswordResetCode(user)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	// send email
+	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset code is %d", *code))
+	return ctx.JSON(fiber.Map{"message": "Password reset code sent to your email address."})
 }
 
 func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error {
+	// verify reset passwrod token
+	// set the new password.
 	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
 }
 
