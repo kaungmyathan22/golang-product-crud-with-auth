@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
 type LoginDTO struct {
@@ -10,8 +10,9 @@ type LoginDTO struct {
 }
 
 type CreatePasswordResetDTO struct {
-	UserID primitive.ObjectID
-	Code   int
+	UserID         string    `bson:"userID"`
+	Code           string    `bson:"code"`
+	ExpirationTime time.Time `bson:"expirationTime"`
 }
 
 type ForgotPasswordDTO struct {

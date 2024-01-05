@@ -18,7 +18,7 @@ func (repo *AuthenticationRepository) GetPasswordResetCodeExpirationTime() time.
 	return time.Now().Add(time.Minute * 5)
 }
 
-func (repository *AuthenticationRepository) GenerateResetPasswordCode(payload *dto.CreatePasswordResetDTO) error {
+func (repository *AuthenticationRepository) GenerateResetPasswordCode(payload dto.CreatePasswordResetDTO) error {
 	var tokenModel models.PasswordResetTokenModel
 	if err := repository.PasswordResetCollecion.FindOne(ctx, bson.M{"userID": payload.UserID}).Decode(&tokenModel); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -30,7 +30,10 @@ func (repository *AuthenticationRepository) GenerateResetPasswordCode(payload *d
 		}
 		return nil
 	}
-	_, err := repository.PasswordResetCollecion.UpdateOne(ctx, bson.M{"_id": tokenModel.ID}, bson.M{"$set": payload})
+	_, err := repository.PasswordResetCollecion.UpdateOne(ctx, bson.M{"_id": tokenModel.ID}, bson.M{"$set": bson.M{
+		"code":           payload.Code,
+		"expirationTime": payload.ExpirationTime,
+	}})
 	if err != nil {
 		return err
 	}
