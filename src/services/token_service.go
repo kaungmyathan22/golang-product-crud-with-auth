@@ -50,6 +50,19 @@ func (tokenService *TokenService) GetRefreshTokenExpiration() time.Time {
 	return time.Now().Add(7 * 24 * time.Hour)
 }
 
+func (tokenService *TokenService) GetPasswordResetTokenExpiration() time.Time {
+	return time.Now().Add(3 * time.Minute)
+}
+
+func (tokenService *TokenService) SignPasswordResetToken(userId string) (string, error) {
+
+	token, err := signToken(tokenService.GetPasswordResetTokenExpiration(), userId, []byte(config.AppConfigInstance.PASSWORD_RESET_TOKEN_SECRET))
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
 func (tokenService *TokenService) SignRefreshToken(userId string) (string, error) {
 
 	token, err := signToken(tokenService.GetRefreshTokenExpiration(), userId, []byte(config.AppConfigInstance.REFRESH_TOKEN_SECRET))
