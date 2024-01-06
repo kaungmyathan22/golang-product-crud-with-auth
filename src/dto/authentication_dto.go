@@ -18,3 +18,7 @@ type CreatePasswordResetDTO struct {
 type ForgotPasswordDTO struct {
 	Email string `json:"email" validate:"required,email" error:"email field is required and must be a valid email address."`
 }
+
+type PasswordResetCodeConfirmationDTO struct {
+	Code string `json:"code" validate:"required,min=6,max=6"`
+}

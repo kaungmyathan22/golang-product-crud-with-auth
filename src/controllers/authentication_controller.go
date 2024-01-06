@@ -206,6 +206,16 @@ func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error
 	return ctx.JSON(fiber.Map{"message": "Password reset code sent to your email address."})
 }
 
+func (controller *AuthenticationController) ConfrimResetPasswordCode(ctx *fiber.Ctx) error {
+	// verify reset passwrod code
+	var payload dto.PasswordResetCodeConfirmationDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		return common.InvalidPayloadErrorResponse(ctx, err)
+	}
+	// set the new password.
+	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
+}
+
 func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error {
 	// verify reset passwrod token
 	// set the new password.
