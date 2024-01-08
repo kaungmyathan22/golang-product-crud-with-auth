@@ -250,12 +250,19 @@ func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error 
 			Errors: common.TransformError(err.Error()),
 		})
 	}
+	hashed_password, err := bcrypt.GenerateFromPassword([]byte(payload.NewPassword), bcrypt.DefaultCost) //payload.Password
+	if err != nil {
+		logger.Info(err.Error())
+		return ctx.Status(fiber.StatusUnauthorized).JSON(common.ErrorResponse{
+			Code:   fiber.StatusInternalServerError,
+			Errors: common.TransformError(("Something went wrong.")),
+		})
+	}
 
-	err = controller.Service.ChangePassword(&dto.UserDTO{ID: objectId}, payload.NewPassword)
+	err = controller.Service.ChangePassword(&dto.UserDTO{ID: objectId}, string(hashed_password))
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
-	fmt.Println("Deleting passwordResetToken")
 	err = controller.AuthenticationService.DeleteResetToken(userId)
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
