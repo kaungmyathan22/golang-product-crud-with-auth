@@ -16,7 +16,7 @@ type AuthenticationService struct {
 func (service *AuthenticationService) CreateNewPasswordResetLink(payload *dto.SavePasswordResetDTO) (string, error) {
 	code := common.GenerateRandomNumber()
 	encryptedToken, err := common.EncryptToken(strconv.Itoa(code), config.AppConfigInstance.PASSWORD_RESET_TOKEN_ENCRYPT_KEY)
-	payload.Code = encryptedToken
+	payload.Code = strconv.Itoa(code)
 	if err != nil {
 		return "", err
 	}
