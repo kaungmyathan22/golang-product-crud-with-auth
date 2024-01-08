@@ -197,23 +197,17 @@ func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
-	code, err := controller.AuthenticationService.CreateNewPasswordResetCode(user)
+	passwordResetToken, err := controller.TokenService.SignPasswordResetToken(user.ID.Hex())
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	encryptedToken, err := controller.AuthenticationService.CreateNewPasswordResetLink(&dto.SavePasswordResetDTO{UserID: user.ID.Hex(), Token: passwordResetToken, ExpirationTime: controller.TokenService.GetPasswordResetTokenExpiration()})
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
 	// send email
-	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset code is %d", *code))
+	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset code is %s", encryptedToken))
 	return ctx.JSON(fiber.Map{"message": "Password reset code sent to your email address."})
-}
-
-func (controller *AuthenticationController) ConfrimResetPasswordCode(ctx *fiber.Ctx) error {
-	// verify reset passwrod code
-	var payload dto.PasswordResetCodeConfirmationDTO
-	if err := ctx.BodyParser(&payload); err != nil {
-		return common.InvalidPayloadErrorResponse(ctx, err)
-	}
-	// set the new password.
-	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
 }
 
 func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error {

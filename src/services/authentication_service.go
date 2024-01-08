@@ -1,9 +1,8 @@
 package services
 
 import (
-	"strconv"
-
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/repositories"
 )
@@ -12,15 +11,15 @@ type AuthenticationService struct {
 	AuthRepository *repositories.AuthenticationRepository
 }
 
-func (service *AuthenticationService) CreateNewPasswordResetCode(user *dto.UserDTO) (*int, error) {
-	code := common.GenerateRandomNumber()
-	err := service.AuthRepository.GenerateResetPasswordCode(dto.CreatePasswordResetDTO{
-		UserID:         user.ID.Hex(),
-		Code:           strconv.Itoa(code),
-		ExpirationTime: service.AuthRepository.GetPasswordResetCodeExpirationTime(),
-	})
+func (service *AuthenticationService) CreateNewPasswordResetLink(payload *dto.SavePasswordResetDTO) (string, error) {
+	encryptedToken, err := common.EncryptToken(payload.Token, config.AppConfigInstance.PASSWORD_RESET_TOKEN_ENCRYPT_KEY)
+	payload.Token = encryptedToken
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &code, nil
+	err = service.AuthRepository.GenerateResetPasswordLink(*payload)
+	if err != nil {
+		return "", err
+	}
+	return encryptedToken, nil
 }

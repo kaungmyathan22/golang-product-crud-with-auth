@@ -9,9 +9,9 @@ type LoginDTO struct {
 	Password string `json:"password" validate:"required,min=6" error:"password field is required and must be a minimum of 6."`
 }
 
-type CreatePasswordResetDTO struct {
+type SavePasswordResetDTO struct {
 	UserID         string    `bson:"userID"`
-	Code           string    `bson:"code"`
+	Token          string    `bson:"token"`
 	ExpirationTime time.Time `bson:"expirationTime"`
 }
 
