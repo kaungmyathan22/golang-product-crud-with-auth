@@ -26,3 +26,9 @@ func (service *AuthenticationService) CreateNewPasswordResetLink(payload *dto.Sa
 	}
 	return encryptedToken, nil
 }
+
+func (service *AuthenticationService) VerifyPasswordResetToken(token string) {
+	// verify token
+	common.DecryptToken(token, config.AppConfigInstance.PASSWORD_RESET_TOKEN_ENCRYPT_KEY)
+	// set new password
+}

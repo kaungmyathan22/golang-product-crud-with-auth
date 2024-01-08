@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -192,15 +193,10 @@ func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error
 	if err := validate.Struct(payload); err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
-	// generate reset passwrord token
 	user, err := controller.Service.GetUserByEmail(payload.Email)
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
-	// passwordResetToken, err := controller.TokenService.SignPasswordResetToken(user.ID.Hex())
-	// if err != nil {
-	// 	return common.BadRequestErrorResponse(ctx, err)
-	// }
 	encryptedToken, err := controller.AuthenticationService.CreateNewPasswordResetLink(&dto.SavePasswordResetDTO{
 		UserID:         user.ID.Hex(),
 		ExpirationTime: controller.TokenService.GetPasswordResetTokenExpiration(),
@@ -208,13 +204,27 @@ func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
+	passwordResetToken, err := controller.TokenService.SignPasswordResetToken(user.ID.Hex(), encryptedToken)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
 	// send email
-	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset link is http://frontend.com/?token=%s", encryptedToken))
+	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset link is http://frontend.com/?token=%s", passwordResetToken))
 	return ctx.JSON(fiber.Map{"message": "Password reset code sent to your email address."})
 }
 
 func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error {
 	// verify reset passwrod token
+	bearerToken := ctx.Get("Authorization")
+	if bearerToken == "" {
+		return common.BadRequestErrorResponse(ctx, fmt.Errorf("invalid password reset token"))
+	}
+	splittedStrings := strings.Split(bearerToken, "Bearer ")
+	if len(splittedStrings) < 2 {
+		return common.BadRequestErrorResponse(ctx, fmt.Errorf("invalid password reset token"))
+	}
+	// passwordResetToken := (splittedStrings[1])
+	// controller.AuthenticationService.
 	// set the new password.
 	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
 }

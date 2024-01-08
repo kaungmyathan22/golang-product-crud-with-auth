@@ -8,3 +8,7 @@ type JwtCustomClaims struct {
 	Exp int64  `json:"exp"`
 	jwt.StandardClaims
 }
+type ResetJwtClaims struct {
+	Code string `json:"code"`
+	JwtCustomClaims
+}

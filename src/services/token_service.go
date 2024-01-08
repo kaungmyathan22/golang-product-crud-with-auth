@@ -49,13 +49,23 @@ func (tokenService *TokenService) GetPasswordResetTokenExpiration() time.Time {
 	return time.Now().Add(5 * time.Minute)
 }
 
-func (tokenService *TokenService) SignPasswordResetToken(userId string) (string, error) {
+func (tokenService *TokenService) SignPasswordResetToken(userId string, code string) (string, error) {
+	expTime := tokenService.GetPasswordResetTokenExpiration()
+	claims := interfaces.ResetJwtClaims{
+		Code: code,
+		JwtCustomClaims: interfaces.JwtCustomClaims{
+			Sub: userId,
+			Iat: time.Now().Unix(),
+			Exp: expTime.Unix(),
+		},
+	}
 
-	token, err := signToken(tokenService.GetPasswordResetTokenExpiration(), userId, []byte(config.AppConfigInstance.PASSWORD_RESET_TOKEN_SECRET))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(config.AppConfigInstance.PASSWORD_RESET_TOKEN_SECRET))
 	if err != nil {
 		return "", err
 	}
-	return token, nil
+	return tokenString, nil
 }
 
 func (tokenService *TokenService) SignRefreshToken(userId string) (string, error) {
