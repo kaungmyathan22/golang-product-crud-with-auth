@@ -11,7 +11,7 @@ type LoginDTO struct {
 
 type SavePasswordResetDTO struct {
 	UserID         string    `bson:"userID"`
-	Token          string    `bson:"token"`
+	Code           string    `bson:"code"`
 	ExpirationTime time.Time `bson:"expirationTime"`
 }
 

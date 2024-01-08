@@ -1,6 +1,8 @@
 package services
 
 import (
+	"strconv"
+
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
@@ -12,8 +14,9 @@ type AuthenticationService struct {
 }
 
 func (service *AuthenticationService) CreateNewPasswordResetLink(payload *dto.SavePasswordResetDTO) (string, error) {
-	encryptedToken, err := common.EncryptToken(payload.Token, config.AppConfigInstance.PASSWORD_RESET_TOKEN_ENCRYPT_KEY)
-	payload.Token = encryptedToken
+	code := common.GenerateRandomNumber()
+	encryptedToken, err := common.EncryptToken(strconv.Itoa(code), config.AppConfigInstance.PASSWORD_RESET_TOKEN_ENCRYPT_KEY)
+	payload.Code = encryptedToken
 	if err != nil {
 		return "", err
 	}

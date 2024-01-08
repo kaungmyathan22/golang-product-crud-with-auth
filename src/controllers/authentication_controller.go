@@ -197,16 +197,19 @@ func (controller *AuthenticationController) ForgotPassword(ctx *fiber.Ctx) error
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
-	passwordResetToken, err := controller.TokenService.SignPasswordResetToken(user.ID.Hex())
-	if err != nil {
-		return common.BadRequestErrorResponse(ctx, err)
-	}
-	encryptedToken, err := controller.AuthenticationService.CreateNewPasswordResetLink(&dto.SavePasswordResetDTO{UserID: user.ID.Hex(), Token: passwordResetToken, ExpirationTime: controller.TokenService.GetPasswordResetTokenExpiration()})
+	// passwordResetToken, err := controller.TokenService.SignPasswordResetToken(user.ID.Hex())
+	// if err != nil {
+	// 	return common.BadRequestErrorResponse(ctx, err)
+	// }
+	encryptedToken, err := controller.AuthenticationService.CreateNewPasswordResetLink(&dto.SavePasswordResetDTO{
+		UserID:         user.ID.Hex(),
+		ExpirationTime: controller.TokenService.GetPasswordResetTokenExpiration(),
+	})
 	if err != nil {
 		return common.BadRequestErrorResponse(ctx, err)
 	}
 	// send email
-	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset code is %s", encryptedToken))
+	controller.EmailService.SendEmail(payload.Email, "Password Reset Code", fmt.Sprintf("Your password reset link is http://frontend.com/?token=%s", encryptedToken))
 	return ctx.JSON(fiber.Map{"message": "Password reset code sent to your email address."})
 }
 

@@ -26,7 +26,7 @@ func (repository *AuthenticationRepository) GenerateResetPasswordLink(payload dt
 		return nil
 	}
 	_, err := repository.PasswordResetCollecion.UpdateOne(ctx, bson.M{"_id": tokenModel.ID}, bson.M{"$set": bson.M{
-		"token":          payload.Token,
+		"code":           payload.Code,
 		"expirationTime": payload.ExpirationTime,
 	}})
 	if err != nil {
