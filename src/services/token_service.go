@@ -1,16 +1,11 @@
 package services
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/common/interfaces"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/config"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/dto"
@@ -51,7 +46,7 @@ func (tokenService *TokenService) GetRefreshTokenExpiration() time.Time {
 }
 
 func (tokenService *TokenService) GetPasswordResetTokenExpiration() time.Time {
-	return time.Now().Add(3 * time.Minute)
+	return time.Now().Add(5 * time.Minute)
 }
 
 func (tokenService *TokenService) SignPasswordResetToken(userId string) (string, error) {
@@ -70,7 +65,7 @@ func (tokenService *TokenService) SignRefreshToken(userId string) (string, error
 		return "", err
 	}
 	// hash token before saving to database
-	hashedToken, err := tokenService.EncryptRefreshToken(token)
+	hashedToken, err := common.EncryptToken(token, config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY)
 	if err != nil {
 		return "", err
 	}
@@ -85,69 +80,12 @@ func (tokenService *TokenService) SignRefreshToken(userId string) (string, error
 	return token, nil
 }
 
-func (tokenService *TokenService) EncryptRefreshToken(token string) (string, error) {
-	key := make([]byte, 32) // Use 32 bytes as an example, adjust as needed
-
-	copy(key, []byte(config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY))
-
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	aesGCM, err := cipher.NewGCM(block)
-	if err != nil {
-		return "", err
-	}
-
-	nonce := make([]byte, aesGCM.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", err
-	}
-
-	ciphertext := aesGCM.Seal(nonce, nonce, []byte(token), nil)
-	return base64.RawStdEncoding.EncodeToString(ciphertext), nil
-}
-
-func (tokenService *TokenService) DecryptRefreshToken(encryptedToken string) (string, error) {
-	ciphertext, err := base64.RawStdEncoding.DecodeString(encryptedToken)
-	if err != nil {
-		return "", err
-	}
-	key := make([]byte, 32)
-
-	copy(key, []byte(config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY))
-
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	aesGCM, err := cipher.NewGCM(block)
-	if err != nil {
-		return "", err
-	}
-
-	nonceSize := aesGCM.NonceSize()
-	if len(ciphertext) < nonceSize {
-		return "", errors.New("ciphertext is too short")
-	}
-
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	decryptedToken, err := aesGCM.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return string(decryptedToken), nil
-}
-
 func (tokenService *TokenService) VerifyRefreshToken(token string, userID string) error {
 	tokenModel, err := tokenService.Repository.GetRefreshTokenByUserID(userID)
 	if err != nil {
 		return err
 	}
-	decryptedToken, err := tokenService.DecryptRefreshToken(tokenModel.TokenHash)
+	decryptedToken, err := common.DecryptToken(tokenModel.TokenHash, config.AppConfigInstance.REFRESH_TOKEN_ENCRYPT_KEY)
 	if err != nil {
 		return err
 	}
