@@ -13,6 +13,7 @@ import (
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/exceptions"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/logger"
 	"github.com/kaungmyathan22/golang-product-crud-with-auth/src/services"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -223,10 +224,43 @@ func (controller *AuthenticationController) ResetPassword(ctx *fiber.Ctx) error 
 	if len(splittedStrings) < 2 {
 		return common.BadRequestErrorResponse(ctx, fmt.Errorf("invalid password reset token"))
 	}
-	// passwordResetToken := (splittedStrings[1])
-	// controller.AuthenticationService.
+	passwordResetToken := (splittedStrings[1])
+	userId, err := controller.AuthenticationService.VerifyPasswordResetToken(passwordResetToken)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
 	// set the new password.
-	return ctx.JSON(fiber.Map{"message": "ResetPassword route"})
+	var payload dto.ResetPasswordDTO
+	if err := ctx.BodyParser(&payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "invalid payload",
+			"error":   err.Error(),
+		})
+	}
+	if err := validate.Struct(payload); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+	objectId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.ErrorResponse{
+			Code:   fiber.StatusBadRequest,
+			Errors: common.TransformError(err.Error()),
+		})
+	}
+
+	err = controller.Service.ChangePassword(&dto.UserDTO{ID: objectId}, payload.NewPassword)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	fmt.Println("Deleting passwordResetToken")
+	err = controller.AuthenticationService.DeleteResetToken(userId)
+	if err != nil {
+		return common.BadRequestErrorResponse(ctx, err)
+	}
+	return ctx.JSON(fiber.Map{"message": "Successfully set new password. Try logging in."})
 }
 
 func (controller *AuthenticationController) VerifyEmail(ctx *fiber.Ctx) error {

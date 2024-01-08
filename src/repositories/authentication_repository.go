@@ -34,3 +34,17 @@ func (repository *AuthenticationRepository) GenerateResetPasswordLink(payload dt
 	}
 	return nil
 }
+
+func (repository *AuthenticationRepository) GetPasswordResetLink(filter bson.M) (*models.PasswordResetTokenModel, error) {
+	var tokenModel *models.PasswordResetTokenModel
+	err := repository.PasswordResetCollecion.FindOne(ctx, filter).Decode(&tokenModel)
+	if err != nil {
+		return nil, err
+	}
+	return tokenModel, nil
+}
+
+func (repo *AuthenticationRepository) DeleteResetToken(userId string) error {
+	result := repo.PasswordResetCollecion.FindOneAndDelete(ctx, bson.M{"userID": userId})
+	return result.Err()
+}
