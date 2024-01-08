@@ -9,6 +9,6 @@ import (
 type PasswordResetTokenModel struct {
 	ID             primitive.ObjectID `bson:"_id,omitempty"`
 	UserID         primitive.ObjectID `bson:"userID"`
-	Code           string             `bson:"code"`
+	Token          string             `bson:"token"`
 	ExpirationTime time.Time          `bson:"expirationTime"`
 }
